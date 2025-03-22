@@ -1,8 +1,14 @@
 import datetime
 from django.contrib import messages
-from django.shortcuts import render, redirect
+from django.http import HttpResponseForbidden
+from django.shortcuts import render, redirect, get_object_or_404
+from django.utils.timezone import now
+
 from .models import Category, News, Sponsor
-from .forms import ContactForm
+from .forms import ContactForm, CommentForm
+from users.models import Comment
+from django.contrib.auth.decorators import login_required
+
 
 def get_date():
     return datetime.datetime.today()
@@ -44,13 +50,35 @@ def about(request):
     }
     return render(request, '404.html', context)
 
+
+from django.contrib.auth.decorators import login_required
+
+
 def detail(request, pk):
     new = News.objects.get(pk=pk)
     news = News.objects.filter(category__name=new.category).order_by('-date')
     popular_news = News.objects.filter(category__name=new.category).order_by('-views')
     sponsor = Sponsor.objects.all()
+    comments = Comment.objects.filter(post__title=new.title).order_by('-created_at')
+
+    for comment in comments:
+        comment.views += 1
+        comment.save()
+
+    form = None
+    if request.user.is_authenticated:  # Faqat login qilgan foydalanuvchilar uchun formni ko'rsatish
+        form = CommentForm(request.POST or None)
+        if request.POST:
+            if form.is_valid():
+                comment = form.save(commit=False)
+                comment.user = request.user
+                comment.post = new
+                comment.save()
+                return redirect('detail', pk=new.pk)
+
     new.views += 1
     new.save()
+
     context = {
         'ctg': get_category(),
         'new': new,
@@ -58,8 +86,11 @@ def detail(request, pk):
         'popular_news': popular_news[:4],
         'date': get_date(),
         'sponsor': sponsor,
+        'comments': comments[:6],
+        'form': form,
     }
     return render(request, 'single_page.html', context)
+
 
 def contact(request):
     news = News.objects.all().order_by('-date')
@@ -94,3 +125,29 @@ def category_detail(request, pk):
         'active_ctg': active_ctg,
     }
     return render(request, 'category.html', context)
+
+
+@login_required
+def like_comment(request, comment_id):
+    comment = get_object_or_404(Comment, id=comment_id)
+    if request.user in comment.likes.all():
+        comment.likes.remove(request.user)
+    else:
+        comment.likes.add(request.user)
+    return redirect('detail', pk=comment.post.pk)
+
+
+@login_required
+def edit_comment(request, comment_id):
+    comment = get_object_or_404(Comment, id=comment_id)
+
+    if request.user != comment.user:
+        return redirect('detail', pk=comment.post.pk)
+
+    if request.method == "POST":
+        form = CommentForm(request.POST, instance=comment)
+        if form.is_valid():
+            comment = form.save(commit=False)
+            comment.edited_at = now()
+            comment.save()
+            return redirect('detail', pk=comment.post.pk)

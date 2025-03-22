@@ -15,13 +15,6 @@
 <link rel="stylesheet" type="text/css" href="{% static 'assets/css/jquery.fancybox.css' %}">
 <link rel="stylesheet" type="text/css" href="{% static 'assets/css/theme.css' %}">
 <link rel="stylesheet" type="text/css" href="{% static 'assets/css/style.css' %}">
-<style>
-.active {
-    background-color: #ffcc00; /* Sariq fon */
-    font-weight: bold;
-}
-</style>
-
 <!--[if lt IE 9]>
 <script src="assets/js/html5shiv.min.js"></script>
 <script src="assets/js/respond.min.js"></script>
@@ -64,23 +57,18 @@
         <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar"> <span class="sr-only">Toggle navigation</span> <span class="icon-bar"></span> <span class="icon-bar"></span> <span class="icon-bar"></span> </button>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
-         <ul class="nav navbar-nav main_nav">
-          <li class="{% if request.resolver_match.url_name == 'index' %}active{% endif %}">
-            <a href="{% url 'index' %}"><span class="fa fa-home desktop-home"></span><span class="mobile-show">Home</span></a>
-          </li>
+        <ul class="nav navbar-nav main_nav">
+          <li class="active"><a href="{% url 'index' %}"><span class="fa fa-home desktop-home"></span><span class="mobile-show">Home</span></a></li>
           {% for ct in ctg %}
           {% if ct.is_active %}
-            <li class="{% if ct.pk == active_ctg.pk %}active{% endif %}">
-              <a href="{% url 'ctg' ct.pk %}">{{ ct.name }}</a>
-            </li>
+            <li><a href="{% url 'ctg' ct.pk %}">{{ ct.name }}</a></li>
           {% endif %}
           {% endfor %}
         </ul>
-
       </div>
     </nav>
   </section>
-  <section id="newsSection">
+      <section id="newsSection">
     <div class="row">
       <div class="col-lg-12 col-md-12">
         <div class="latest_newsarea"> <span>Latest News</span>
@@ -107,45 +95,36 @@
       </div>
     </div>
   </section>
-  <section id="sliderSection">
-    <div class="row">
-      <div class="col-lg-8 col-md-8 col-sm-8">
-        <div class="slick_slider">
-          {% for new in news %}
-          {% if forloop.counter < 4 %}
-          <div class="single_iteam"> <a href = "{% url 'detail' new.pk %}"> <img src="{{ new.image.url }}" alt=""></a>
-            <div class="slider_article">
-              <h2><a class="slider_tittle" href="{% url 'detail' new.pk %}">{{ new.title }}</a></h2>
-              <p>{{ new.short_desc }}...</p>
-            </div>
-          </div>
-          {% endif %}
-          {% endfor %}
-        </div>
-      </div>
-      <div class="col-lg-4 col-md-4 col-sm-4">
-        <div class="latest_post">
-          <h2><span>Latest post</span></h2>
-          <div class="latest_post_container">
-            <div id="prev-button"><i class="fa fa-chevron-up"></i></div>
-            <ul class="latest_postnav">
-              <li>
-                {% for new in news %}
-                {% if forloop.counter < 5 %}
-                <div class="media"> <a href="{% url 'detail' new.pk %}" class="media-left"> <img alt="" src="{{ new.image.url }}"> </a>
-                  <div class="media-body"> <a href="{% url 'detail' new.pk %}" class="catg_title"> {{ new.title }}</a> </div>
-                </div>
-                {% endif %}
-                {% endfor %}
-              </li>
-            </ul>
-            <div id="next-button"><i class="fa  fa-chevron-down"></i></div>
-          </div>
-        </div>
-      </div>
+    <div class="profile-container">
+        <h2>{{ user.first_name }} {{ user.last_name }}</h2>
+        <p><strong>Username:</strong> {{ user.username }}</p>
+        <p><strong>First Name:</strong> {{ user.first_name }}</p>
+        <p><strong>Last Name:</strong> {{ user.last_name }}</p>
+        <p><strong>Email:</strong> {{ user.email }}</p>
+        <hr>
+            <button class="btn btn-custom" onclick="toggleEditForm()">✏ Tahrirlash</button>
+
+            <form method="post" enctype="multipart/form-data" class="edit-form mt-3" id="editForm" style="display: none;">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button type="submit" class="btn btn-success w-100">Saqlash</button>
+            </form>
+
+
+        <hr>
+        <a href="{% url 'logout' %}" class="btn btn-danger w-100">Chiqish</a>
     </div>
-  </section>
-    <footer id="footer">
+
+    <script>
+        function toggleEditForm() {
+            const form = document.getElementById('editForm');
+            form.style.display = form.style.display === "block" ? "none" : "block";
+        }
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+  <footer id="footer">
     <div class="footer_top">
       <div class="row">
         <div class="col-lg-4 col-md-4 col-sm-4">

@@ -35,6 +35,7 @@
               <li><a href="{% url 'index' %}">Home</a></li>
               <li><a href="{% url 'about' %}">About</a></li>
               <li><a href="{% url 'contact' %}">Contact</a></li>
+              <li><a href="{% url 'profile' %}">Profile</a></li>
             </ul>
           </div>
           <div class="header_top_right">
@@ -109,6 +110,92 @@
               <p>{{ new.short_desc }}</p>
               <blockquote> {{ new.description }} </blockquote>
             </div>
+<!-- Kommentlar Ro‘yxati -->
+<div class="comments_section">
+    <h2>Comments <i class="fa fa-comments"></i></h2>
+    {% for comment in comments %}
+        <div class="comment" id="comment_{{ comment.id }}" style="padding: 10px; border-bottom: 1px solid #ddd;">
+            <strong>{{ comment.user }}</strong> -
+            <span>{{ comment.created_at.date }}</span>
+
+            {% if comment.edited_at %}
+                <span style="color: gray; font-size: 12px;">(Tahrirlangan)</span>
+            {% endif %}
+
+            <!-- Komment matni -->
+            <p id="text_{{ comment.id }}">{{ comment.content }}</p>
+
+            <small>
+                <i class="fa fa-eye"></i> {{ comment.views }} views
+            </small>
+
+            <!-- Like tugmasi -->
+            <form method="POST" action="{% url 'like_comment' comment.id %}" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-sm btn-light">
+                    {% if request.user in comment.likes.all %}
+                        <i class="fa fa-thumbs-up" style="color: blue;"></i>
+                    {% else %}
+                        <i class="fa fa-thumbs-o-up"></i>
+                    {% endif %}
+                    <span>{{ comment.total_likes }}</span>
+                </button>
+            </form>
+
+            <!-- Faqat egasi tahrirlashi mumkin -->
+            {% if request.user == comment.user %}
+                <button onclick="showEditForm({{ comment.id }})" class="btn btn-sm btn-warning">
+                    <i class="fa fa-edit"></i> Edit
+                </button>
+            {% endif %}
+
+            <!-- Tahrirlash formasi -->
+            <form id="edit_form_{{ comment.id }}" method="POST" action="{% url 'edit_comment' comment.id %}" style="display: none; margin-top: 10px;">
+                {% csrf_token %}
+                <textarea name="content" class="form-control">{{ comment.content }}</textarea>
+                <button type="submit" class="btn btn-sm btn-success mt-2">Save</button>
+                <button type="button" class="btn btn-sm btn-secondary mt-2" onclick="hideEditForm({{ comment.id }})">Cancel</button>
+            </form>
+        </div>
+    {% empty %}
+        <p>Hozircha commentlar yo'q!!!</p>
+    {% endfor %}
+</div>
+
+
+<!-- Komment Qo‘shish Formasi -->
+{% if user.is_authenticated %}
+<div class="comment_form">
+    <h3>Leave a Comment</h3>
+    <form method="POST">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+</div>
+{% else %}
+<p>Izoh qoldirish uchun
+    <a href="{% url 'login' %}?next={{ request.get_full_path }}" class="btn btn-sm btn-success">Login</a>
+</p>
+{% endif %}
+
+
+
+<!-- JavaScript - Edit formni ko‘rsatish va yashirish -->
+<script>
+    function showEditForm(commentId) {
+        document.getElementById('text_' + commentId).style.display = 'none';
+        document.getElementById('edit_form_' + commentId).style.display = 'block';
+    }
+
+    function hideEditForm(commentId) {
+        document.getElementById('text_' + commentId).style.display = 'block';
+        document.getElementById('edit_form_' + commentId).style.display = 'none';
+    }
+</script>
+
+
+
             <div class="social_link">
               <ul class="sociallink_nav">
                   <li><a href="https://www.facebook.com/" target="_blank"><i class="fa fa-facebook"></i></a></li>
