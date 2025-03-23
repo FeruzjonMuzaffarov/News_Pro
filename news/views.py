@@ -1,9 +1,7 @@
 import datetime
 from django.contrib import messages
-from django.http import HttpResponseForbidden
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils.timezone import now
-
 from .models import Category, News, Sponsor
 from .forms import ContactForm, CommentForm
 from users.models import Comment
@@ -50,8 +48,6 @@ def about(request):
     }
     return render(request, '404.html', context)
 
-
-from django.contrib.auth.decorators import login_required
 
 
 def detail(request, pk):
