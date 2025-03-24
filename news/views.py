@@ -62,7 +62,7 @@ def detail(request, pk):
         comment.save()
 
     form = None
-    if request.user.is_authenticated:  # Faqat login qilgan foydalanuvchilar uchun formni ko'rsatish
+    if request.user.is_authenticated:
         form = CommentForm(request.POST or None)
         if request.POST:
             if form.is_valid():
@@ -144,6 +144,6 @@ def edit_comment(request, comment_id):
         form = CommentForm(request.POST, instance=comment)
         if form.is_valid():
             comment = form.save(commit=False)
-            comment.edited_at = now()
+            comment.edited_ad = now()
             comment.save()
             return redirect('detail', pk=comment.post.pk)

@@ -95,34 +95,68 @@
       </div>
     </div>
   </section>
-    <div class="profile-container">
-        <h2>{{ user.first_name }} {{ user.last_name }}</h2>
-        <p><strong>Username:</strong> {{ user.username }}</p>
-        <p><strong>First Name:</strong> {{ user.first_name }}</p>
-        <p><strong>Last Name:</strong> {{ user.last_name }}</p>
-        <p><strong>Email:</strong> {{ user.email }}</p>
-        <hr>
-            <button class="btn btn-custom" onclick="toggleEditForm()">✏ Tahrirlash</button>
+<div class="profile-container">
+    <h2>{{ user.first_name }} {{ user.last_name }}</h2>
+    <p><strong>Username:</strong> {{ user.username }}</p>
+    <p><strong>First Name:</strong> {{ user.first_name }}</p>
+    <p><strong>Last Name:</strong> {{ user.last_name }}</p>
+    <p><strong>Email:</strong> {{ user.email }}</p>
+    <hr>
 
-            <form method="post" enctype="multipart/form-data" class="edit-form mt-3" id="editForm" style="display: none;">
+    <button class="btn btn-custom" onclick="toggleEditForm()">✏ Tahrirlash</button>
+
+    <form method="post" enctype="multipart/form-data" class="edit-form mt-3" id="editForm" style="display: none;">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-success w-100">Saqlash</button>
+    </form>
+
+    <hr>
+
+    <button class="btn btn-info w-100" onclick="toggleComments()">📝 Mening izohlarim</button>
+<div id="commentsSection" style="display: none; margin-top: 10px;">
+    {% for comment in comments %}
+        <div class="alert alert-secondary d-flex justify-content-between align-items-center">
+            <div>
+                <strong>
+                    <a href="{% url 'detail' comment.post.id %}" target="_blank">
+                        {{ comment.post.title }}
+                    </a>
+                </strong>
+                <br>
+                <small>{{ comment.created_at|date:"Y-m-d H:i" }} | Yozgan: {{ comment.user.username }}</small>
+                <p>{{ comment.content }}</p>
+            </div>
+            <form method="post" action="{% url 'delete_comment' comment.id %}" onsubmit="return confirm('Haqiqatan ham o‘chirmoqchimisiz?');">
                 {% csrf_token %}
-                {{ form.as_p }}
-                <button type="submit" class="btn btn-success w-100">Saqlash</button>
+                <button type="submit" class="btn btn-danger btn-sm">🗑 O‘chirish</button>
             </form>
+        </div>
+    {% empty %}
+        <p class="text-muted">Siz hali izoh qoldirmagansiz.</p>
+    {% endfor %}
+</div>
 
 
-        <hr>
-        <a href="{% url 'logout' %}" class="btn btn-danger w-100">Chiqish</a>
-    </div>
+    <hr>
 
-    <script>
-        function toggleEditForm() {
-            const form = document.getElementById('editForm');
-            form.style.display = form.style.display === "block" ? "none" : "block";
-        }
-    </script>
+    <a href="{% url 'logout' %}" class="btn btn-danger w-100">Chiqish</a>
+</div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    function toggleEditForm() {
+        const form = document.getElementById('editForm');
+        form.style.display = form.style.display === "block" ? "none" : "block";
+    }
+
+    function toggleComments() {
+        const commentsSection = document.getElementById('commentsSection');
+        commentsSection.style.display = commentsSection.style.display === "block" ? "none" : "block";
+    }
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 
   <footer id="footer">
     <div class="footer_top">

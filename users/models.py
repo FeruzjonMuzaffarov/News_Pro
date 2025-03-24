@@ -10,7 +10,7 @@ class Comment(models.Model):
     likes = models.ManyToManyField(User, related_name='liked_comments', blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     views = models.IntegerField(default=0)
-    edited_ad = models.DateTimeField(auto_now=True, null=True, blank=True)
+    edited_ad = models.DateTimeField(null=True, blank=True)
 
     def total_likes(self):
         return self.likes.count()
